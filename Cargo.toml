@@ -2,7 +2,16 @@
 name = "ip2region"
 version = "0.1.0"
 edition = "2021"
-
+description = "ip2region for rust"
+documentation = "https://docs.rs/ip2region"
+readme = "README.md"
+homepage = "https://github.com/openmynet/ip2region-rs"
+repository = "https://github.com/openmynet/ip2region-rs"
+license = "MIT"
+license-file = "LICENSE"
+keywords = ["ip", "location", "geolocation"]
+categories = ["accessibility"]
+exclude = ["data/*"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bench]]
