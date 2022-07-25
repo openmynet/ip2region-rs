@@ -1,4 +1,9 @@
 # ip2region-rs
+=======
+
+[![ip2region crate](https://img.shields.io/crates/v/ip2region.svg)](https://crates.io/crates/ip2region)
+[![ip2region documentation](https://docs.rs/ip2region/badge.svg)](https://docs.rs/ip2region)
+![minimum rustc 1.0](https://img.shields.io/badge/rustc-1.0+-red.svg)
 
 > ip2region 的rust非官实现版本
 
