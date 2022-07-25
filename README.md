@@ -1,5 +1,4 @@
 # ip2region-rs
-=======
 
 [![ip2region crate](https://img.shields.io/crates/v/ip2region.svg)](https://crates.io/crates/ip2region)
 [![ip2region documentation](https://docs.rs/ip2region/badge.svg)](https://docs.rs/ip2region)
