@@ -61,12 +61,12 @@ impl IpIndex {
 ///
 /// ip2region 官方标准数据格式
 #[derive(Clone, PartialEq, Debug, Default)]
-pub struct Location {
-    pub contry: Option<String>,
-    pub region: Option<String>,
-    pub province: Option<String>,
-    pub city: Option<String>,
-    pub isp: Option<String>,
+pub struct Location<'a> {
+    pub contry: Option<&'a str>,
+    pub region: Option<&'a str>,
+    pub province: Option<&'a str>,
+    pub city: Option<&'a str>,
+    pub isp: Option<&'a str>,
 }
 /// ip2region searcher
 ///
@@ -99,7 +99,7 @@ impl Searcher {
     /// Search IP area information
     ///
     /// 搜索IP区域信息
-    pub fn search(&self, ip_v4: &str) -> Result<String, Error> {
+    pub fn search(&self, ip_v4: &str) -> Result<&str, Error> {
         let ip = ip_v4.parse::<std::net::Ipv4Addr>()?.octets();
         let ip = u32::from_be_bytes(ip);
         // Integer of the first byte (&0xFF, make sure the value is between 0 ~ 255)
@@ -135,20 +135,18 @@ impl Searcher {
             let ip_index = IpIndex::new(buff)?;
             if ip < ip_index.start_ip {
                 h = m - 1;
+            } else if ip > ip_index.end_ip {
+                l = m + 1;
             } else {
-                if ip > ip_index.end_ip {
-                    l = m + 1;
-                } else {
-                    index = Some(ip_index);
-                    break;
-                }
+                index = Some(ip_index);
+                break;
             };
         }
-        let index = index.ok_or(super::error::Ip2RegionError::NoneError(
-            "No results found!".to_string(),
-        ))?;
+        let index = index.ok_or_else(|| {
+            super::error::Ip2RegionError::NoneError("No results found!".to_string())
+        })?;
         let data = &self.content[index.start_at()..index.end_at()];
-        let ip = String::from_utf8(data.to_vec())?;
+        let ip = std::str::from_utf8(data)?;
         Ok(ip)
     }
 
@@ -157,7 +155,7 @@ impl Searcher {
     /// 搜索并返回官方标准格式的结果
     pub fn std_search(&self, ip_v4: &str) -> Result<Location, Error> {
         let ip = self.search(ip_v4)?;
-        let ip = ip.split("|").collect::<Vec<_>>();
+        let ip = ip.split('|').collect::<Vec<&str>>();
         let r = Location {
             contry: get(&ip, 0),
             region: get(&ip, 1),
@@ -174,12 +172,12 @@ impl Searcher {
     }
 }
 
-pub fn get(v: &Vec<&str>, i: usize) -> Option<String> {
+pub fn get<'a, 'b>(v: &'a [&'b str], i: usize) -> Option<&'b str> {
     v.get(i).and_then(|i| {
         if i.is_empty() || *i == "0" {
             None
         } else {
-            Some(i.to_string())
+            Some(*i)
         }
     })
 }
@@ -203,8 +201,8 @@ fn test_ip() {
     println!("{:?}", location);
     assert!(location.is_ok());
     let location = location.unwrap();
-    assert_eq!(location.city, Some("深圳市".to_string()));
-    assert_eq!(location.isp, Some("阿里云".to_string()));
+    assert_eq!(location.city, Some("深圳市"));
+    assert_eq!(location.isp, Some("阿里云"));
     let location = searcher.std_search("208.67.222.222");
     println!("{:?}", location);
     assert!(location.is_ok());
